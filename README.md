@@ -136,7 +136,7 @@ path.resolve("/foo/bar", "/tmp/file/");
 // returns "/tmp/file"
 ```
 
-### STATIC MEMBERS
+## STATIC MEMBERS
 
 ### path.sep
 The platform-specific file separator. "\\" or "/".
