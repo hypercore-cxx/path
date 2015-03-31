@@ -1,0 +1,5 @@
+*.sw*
+build/
+deps/
+test/test
+
