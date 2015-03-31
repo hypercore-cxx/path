@@ -27,7 +27,7 @@ p.extname("/path.to/.file.ext") == ".ext";
 
 ## INSTANCE METHODS
 
-### path.join(string path1, string path2[, ...]);
+### string path.join(string path1, string path2[, ...]);
 Join all arguments together and normalize the resulting path. Arguments
 must be strings.
 
@@ -36,7 +36,7 @@ path.join("/foo", "bar", "baz/asdf", "quux", "..");
 // returns "/foo/bar/baz/asdf"
 ```
 
-### path.isAbsolute(string path);
+### bool path.isAbsolute(string path);
 Determines whether path is an absolute path. An absolute path will always
 resolve to the same location, regardless of the working directory.
 
@@ -47,7 +47,7 @@ path.isAbsolute("qux/"); // false
 path.isAbsolute("."); // false
 ```
 
-### path.dirname(string path);
+### string path.dirname(string path);
 Return the directory name of a path. Similar to the Unix dirname command.
 
 ```cpp
@@ -55,7 +55,7 @@ path.dirname("/foo/bar/baz/asdf/quux");
 // returns "/foo/bar/baz/asdf"
 ```
 
-### path.basename(string path[, string ext]);
+### string path.basename(string path[, string ext]);
 Return the last portion of a path. Similar to the Unix basename command.
 
 ```cpp
@@ -66,7 +66,7 @@ path.basename("/foo/bar/baz/asdf/quux.html", ".html");
 // returns "quux"
 ```
 
-### path.extname(string path);
+### string path.extname(string path);
 Return the extension of the path, from the last "." to end of string in the
 last portion of the path. If there is no "." in the last portion of the path
 or the first character of it is ".", then it returns an empty string. 
@@ -86,7 +86,7 @@ path.extname("index");
 // returns ""
 ```
 
-### path.parse(string path);
+### string path.parse(string path);
 Returns an object from a path string.
 
 ```cpp
@@ -102,7 +102,7 @@ o.ext = ".txt";
 o.name = "file";
 ```
 
-### path.format(struct pathObject);
+### PathObject path.format(struct pathObject);
 Returns a path string from an object, the opposite of path.parse above.
 The struct can be created with the `path.createObject()` method.
 
@@ -119,7 +119,7 @@ path.format(o);
 // returns "/home/user/dir/file.txt"
 ```
 
-### path.resolve(string path);
+### string path.resolve(string path);
 Resolves to to an absolute path. If to isn"t already absolute from 
 arguments are prepended in right to left order, until an absolute path 
 is found. The resulting path is normalized, and trailing slashes are 
