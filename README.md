@@ -4,16 +4,18 @@ It is a direct port from the iojs project but does not support windows.
 Almost all these methods perform only string transformations. The file 
 system is not consulted to check whether paths are valid.
 
-# AS A MODULE USING `BALE`.
-```
+# USAGE
+
+## AS A MODULE USING `BALE`.
+```cpp
 import p "path"
 p.extname("/path.to/.file.ext") == ".ext";
 ```
 
-# AS A REGLUAR C++ LIBRARY.
+## AS A REGLUAR C++ LIBRARY.
 Build with `path.cc` as a dependency and include the header file.
 
-```
+```cpp
 #include "path.h"
 Path p;
 p.extname("/path.to/.file.ext") == ".ext";
