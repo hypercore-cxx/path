@@ -1,0 +1,28 @@
+{
+  "name": "path",
+  "description": "Utilities for handling and transforming filesystem paths.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:datcxx/cxx-path"
+  },
+  "dependencies": {
+    "git@github.com:datcxx/cxx-util": "0568a579",
+    "git@github.com:heapwolf/cxx-tap": "8a380d78"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": [
+      "c++ -std=c++2a",
+      "test/index.cxx -o test/index"
+    ],
+    "posttest": "./test/index"
+  },
+  "flags": [
+    "-std=c++2a",
+    "-O3"
+  ],
+  "files": [
+    "index.hxx",
+    "index.cxx"
+  ]
+}

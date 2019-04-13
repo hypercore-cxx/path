@@ -1,40 +1,28 @@
 # SYNOPSIS
-This module contains utilities for handling and transforming file paths.
-It is a direct port from the iojs project but does not support windows.
-Almost all these methods perform only string transformations. The file 
-system is not consulted to check whether paths are valid.
+Utilities for handling and transforming filesystem paths.
 
 # USAGE
 
 ## AS A MODULE USING `BALE`.
 ```cpp
-import p "path"
-p.extname("/path.to/.file.ext") == ".ext";
+Path::extname("/path.to/.file.ext") == ".ext";
 ```
 
 ## AS A REGLUAR C++ LIBRARY.
 Build with `path.cc` as a dependency and include the header file.
 
 ```cpp
-#include "path.h"
-Path p;
-p.extname("/path.to/.file.ext") == ".ext";
+Path::extname("/path.to/.file.ext") == ".ext";
 ```
 
 # API
-
-## CONSTRUCTOR
-
-### Path p;
-
-## INSTANCE METHODS
 
 #### `string` path.join(string path1, string path2[, ...]);
 Join all arguments together and normalize the resulting path. Arguments
 must be strings.
 
 ```cpp
-path.join("/foo", "bar", "baz/asdf", "quux", "..");
+Path::join("/foo", "bar", "baz/asdf", "quux", "..");
 // returns "/foo/bar/baz/asdf"
 ```
 
@@ -43,17 +31,17 @@ Determines whether path is an absolute path. An absolute path will always
 resolve to the same location, regardless of the working directory.
 
 ```cpp
-path.isAbsolute("/foo/bar"); // true
-path.isAbsolute("/baz/.."); // true
-path.isAbsolute("qux/"); // false
-path.isAbsolute("."); // false
+Path::isAbsolute("/foo/bar"); // true
+Path::isAbsolute("/baz/.."); // true
+Path::isAbsolute("qux/"); // false
+Path::isAbsolute("."); // false
 ```
 
 #### `string` path.dirname(string path);
 Return the directory name of a path. Similar to the Unix dirname command.
 
 ```cpp
-path.dirname("/foo/bar/baz/asdf/quux");
+Path::dirname("/foo/bar/baz/asdf/quux");
 // returns "/foo/bar/baz/asdf"
 ```
 
@@ -61,7 +49,7 @@ path.dirname("/foo/bar/baz/asdf/quux");
 Return the last portion of a path. Similar to the Unix basename command.
 
 ```cpp
-path.basename("/foo/bar/baz/asdf/quux.html");
+Path::basename("/foo/bar/baz/asdf/quux.html");
 // returns "quux.html"
 
 path.basename("/foo/bar/baz/asdf/quux.html", ".html");
@@ -75,16 +63,16 @@ or the first character of it is ".", then it returns an empty string.
 Examples:
 
 ```cpp
-path.extname("index.html");
+Path::extname("index.html");
 // returns ".html"
 
-path.extname("index.coffee.md");
+Path::extname("index.coffee.md");
 // returns ".md"
 
-path.extname("index.");
+Path::extname("index.");
 // returns "."
 
-path.extname("index");
+Path::extname("index");
 // returns ""
 ```
 
@@ -92,7 +80,7 @@ path.extname("index");
 Returns an object from a path string.
 
 ```cpp
-auto o = path.parse("/home/user/dir/file.txt");
+auto o = Path::parse("/home/user/dir/file.txt");
 ```
 
 Returns a struct of type PathObject with the following members...
@@ -110,14 +98,14 @@ The struct can be created with the `path.createObject()` method.
 
 ```cpp
 
-auto o = path.createObject();
+auto o = Path::createObject();
 
 o.dir = "/home/user/dir";
 o.base = "file.txt";
 o.ext = ".txt";
 o.name = "file";
 
-path.format(o);
+Path::format(o);
 // returns "/home/user/dir/file.txt"
 ```
 
@@ -131,10 +119,10 @@ from arguments will throw an error.
 Another way to think of it is as a sequence of cd commands in a shell.
 
 ```cpp
-path.resolve("/foo/bar", "./baz");
+Path::resolve("/foo/bar", "./baz");
 // returns "/foo/bar/baz"
 
-path.resolve("/foo/bar", "/tmp/file/");
+Path::resolve("/foo/bar", "/tmp/file/");
 // returns "/tmp/file"
 ```
 
