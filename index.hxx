@@ -28,11 +28,30 @@ namespace Path {
   String delimiter();
 
   bool isAbsolute(const String&);
-
+  String normalize(const String&);
   String basename(const String&, const String&);
   String basename(const String&);
-
+  String dirname(const String&);
   String extname(const String&);
+
+  String format(PathObject&);
+  PathObject parse(const String&);
+  PathObject createObject();
+
+  String joinVector(const std::vector<String>&);
+  String resolveFromVector(const std::vector<String>&);
+
+  template <typename ...Args>
+  String join(Args... argsT) {
+    std::vector<String> args = { (String) argsT... };
+    return Path::joinVector(args);
+  }
+
+  template <typename ...Args>
+  String resolve(Args... argsT) {
+    std::vector<String> args = { (String) argsT... };
+    return Path::resolveFromVector(args);
+  }
 
   /*
   smatch split(string);
@@ -42,8 +61,6 @@ namespace Path {
   string _join(vector<string>);
   string _resolve(vector<string>);
 
-  string normalize(string);
-
   template <typename... Args>
   string join(Args... args);
 
@@ -52,10 +69,6 @@ namespace Path {
 
   string dirname(const string);
 
-
-  string format(PathObject);
-  PathObject parse(const string);
-  PathObject createObject();
 
   template <typename ...Args>
   string join(Args... argsT) {

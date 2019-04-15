@@ -75,108 +75,103 @@ int main() {
     t->end();
   });
 
-  return 0;
+  t.test("normalize", [&] (auto t) {
+    t->equal(Path::normalize("./fixtures///b/../b/c.js"), "fixtures/b/c.js");
+    t->equal(Path::normalize("/foo/../../../bar"), "/bar");
+    t->equal(Path::normalize("a//b//../b"), "a/b");
+    t->equal(Path::normalize("a//b//./c"), "a/b/c");
+    t->equal(Path::normalize("a//b//."), "a/b");
+    t->end();
+  });
 
-  /*
-  //
-  // extname
-  //
+  t.test("dirname", [&] (auto t) {
+    t->equal(Path::dirname("/a/b/"), "/a");
+    t->equal(Path::dirname("/a/b"), "/a");
+    t->equal(Path::dirname("/a"), "/");
+    t->equal(Path::dirname(""), ".");
+    t->equal(Path::dirname("/"), "/");
+    t->equal(Path::dirname("////"), "/");
+    t->end();
+  });
 
+  t.test("join", [&] (auto t) {
+    t->equal(Path::join(".", "x/b", "..", "/b/c.js"), "x/b/c.js");
+    t->equal(Path::join( "/.", "x/b", "..", "/b/c.js"), "/x/b/c.js");
+    t->equal(Path::join("/foo", "../../../bar"), "/bar");
+    t->equal(Path::join("foo", "../../../bar"), "../../bar");
+    t->equal(Path::join("foo/", "../../../bar"), "../../bar");
+    t->equal(Path::join("foo/x", "../../../bar"), "../bar");
+    t->equal(Path::join("foo/x", "./bar"), "foo/x/bar");
+    t->equal(Path::join("foo/x/", "./bar"), "foo/x/bar");
+    t->equal(Path::join("foo/x/", ".", "bar"), "foo/x/bar");
+    t->equal(Path::join("./"), "./");
+    t->equal(Path::join(".", "./"), "./");
+    t->equal(Path::join(".", ".", "."), ".");
+    t->equal(Path::join(".", "./", "."), ".");
+    t->equal(Path::join(".", "/./", "."), ".");
+    t->equal(Path::join(".", "/////./", "."), ".");
+    t->equal(Path::join("."), ".");
+    t->equal(Path::join("", "."), ".");
+    t->equal(Path::join("", "foo"), "foo");
+    t->equal(Path::join("foo", "/bar"), "foo/bar");
+    t->equal(Path::join("", "/foo"), "/foo");
+    t->equal(Path::join("", "", "/foo"), "/foo");
+    t->equal(Path::join("", "", "foo"), "foo");
+    t->equal(Path::join("foo", ""), "foo");
+    t->equal(Path::join("foo/", ""), "foo/");
+    t->equal(Path::join("foo", "", "/bar"), "foo/bar");
+    t->equal(Path::join("./", "..", "/foo"), "../foo");
+    t->equal(Path::join("./", "..", "..", "/foo"), "../../foo");
+    t->equal(Path::join(".", "..", "..", "/foo"), "../../foo");
+    t->equal(Path::join("", "..", "..", "/foo"), "../../foo");
+    t->equal(Path::join("/"), "/");
+    t->equal(Path::join("/", "."), "/");
+    t->equal(Path::join("/", ".."), "/");
+    t->equal(Path::join("/", "..", ".."), "/");
+    t->equal(Path::join(""), ".");
+    t->equal(Path::join("", ""), ".");
+    t->equal(Path::join(" /foo"), " /foo");
+    t->equal(Path::join(" ", "foo"), " /foo");
+    t->equal(Path::join(" ", "."), " ");
+    t->equal(Path::join(" ", "/"), " /");
+    t->equal(Path::join(" ", ""), " ");
+    t->equal(Path::join("/", "foo"), "/foo");
+    t->equal(Path::join("/", "/foo"), "/foo");
+    t->equal(Path::join("/", "//foo"), "/foo");
+    t->equal(Path::join("/", "", "/foo"), "/foo");
+    t->equal(Path::join("", "/", "foo"), "/foo");
+    t->equal(Path::join("", "/", "/foo"), "/foo");
+    t->end();
+  });
 
-  //
-  // dirname
-  //
-  ASSERT("dirname", Path::dirname("/a/b/") == "/a");
-  ASSERT("dirname", Path::dirname("/a/b") == "/a");
-  ASSERT("dirname", Path::dirname("/a") == "/");
-  ASSERT("dirname", Path::dirname("") == ".");
-  ASSERT("dirname", Path::dirname("/") == "/");
-  ASSERT("dirname", Path::dirname("////") == "/");
+  t.test("resolve", [&] (auto t) {
+    t->equal(Path::resolve("/var/lib", "../", "file/"), "/var/file");
+    t->equal(Path::resolve("/var/lib", "/../", "file/"), "/file");
+    t->equal(Path::resolve("/some/dir", ".", "/absolute/"), "/absolute");
+    t->end();
+  });
 
-  // 
-  // normalize
-  //
-  ASSERT("normalize", Path::normalize("./fixtures///b/../b/c.js") == "fixtures/b/c.js");
-  ASSERT("normalize", Path::normalize("/foo/../../../bar") == "/bar");
-  ASSERT("normalize", Path::normalize("a//b//../b") == "a/b");
-  ASSERT("normalize", Path::normalize("a//b//./c") == "a/b/c");
-  ASSERT("normalize", Path::normalize("a//b//.") == "a/b");
+  t.test("parse and format", [&] (auto t) {
 
-  //
-  // resolve
-  //
-  ASSERT("resolve", Path::resolve("/var/lib", "../", "file/") == "/var/file");
-  ASSERT("resolve", Path::resolve("/var/lib", "/../", "file/") == "/file");
-  ASSERT("resolve", Path::resolve("/some/dir", ".", "/absolute/") == "/absolute");
+    std::string stra = "/home/user/dir/file.txt";
 
-  //
-  // join
-  //
-  ASSERT("join", Path::join(".", "x/b", "..", "/b/c.js") == "x/b/c.js");
-  ASSERT("join", Path::join( "/.", "x/b", "..", "/b/c.js") == "/x/b/c.js");
-  ASSERT("join", Path::join("/foo", "../../../bar") == "/bar");
-  ASSERT("join", Path::join("foo", "../../../bar") == "../../bar");
-  ASSERT("join", Path::join("foo/", "../../../bar") == "../../bar");
-  ASSERT("join", Path::join("foo/x", "../../../bar") == "../bar");
-  ASSERT("join", Path::join("foo/x", "./bar") == "foo/x/bar");
-  ASSERT("join", Path::join("foo/x/", "./bar") == "foo/x/bar");
-  ASSERT("join", Path::join("foo/x/", ".", "bar") == "foo/x/bar");
-  ASSERT("join", Path::join("./") == "./");
-  ASSERT("join", Path::join(".", "./") == "./");
-  ASSERT("join", Path::join(".", ".", ".") == ".");
-  ASSERT("join", Path::join(".", "./", ".") == ".");
-  ASSERT("join", Path::join(".", "/./", ".") == ".");
-  ASSERT("join", Path::join(".", "/////./", ".") == ".");
-  ASSERT("join", Path::join(".") == ".");
-  ASSERT("join", Path::join("", ".") == ".");
-  ASSERT("join", Path::join("", "foo") == "foo");
-  ASSERT("join", Path::join("foo", "/bar") == "foo/bar");
-  ASSERT("join", Path::join("", "/foo") == "/foo");
-  ASSERT("join", Path::join("", "", "/foo") == "/foo");
-  ASSERT("join", Path::join("", "", "foo") == "foo");
-  ASSERT("join", Path::join("foo", "") == "foo");
-  ASSERT("join", Path::join("foo/", "") == "foo/");
-  ASSERT("join", Path::join("foo", "", "/bar") == "foo/bar");
-  ASSERT("join", Path::join("./", "..", "/foo") == "../foo");
-  ASSERT("join", Path::join("./", "..", "..", "/foo") == "../../foo");
-  ASSERT("join", Path::join(".", "..", "..", "/foo") == "../../foo");
-  ASSERT("join", Path::join("", "..", "..", "/foo") == "../../foo");
-  ASSERT("join", Path::join("/") == "/");
-  ASSERT("join", Path::join("/", ".") == "/");
-  ASSERT("join", Path::join("/", "..") == "/");
-  ASSERT("join", Path::join("/", "..", "..") == "/");
-  ASSERT("join", Path::join("") == ".");
-  ASSERT("join", Path::join("", "") == ".");
-  ASSERT("join", Path::join(" /foo") == " /foo");
-  ASSERT("join", Path::join(" ", "foo") == " /foo");
-  ASSERT("join", Path::join(" ", ".") == " ");
-  ASSERT("join", Path::join(" ", "/") == " /");
-  ASSERT("join", Path::join(" ", "") == " ");
-  ASSERT("join", Path::join("/", "foo") == "/foo");
-  ASSERT("join", Path::join("/", "/foo") == "/foo");
-  ASSERT("join", Path::join("/", "//foo") == "/foo");
-  ASSERT("join", Path::join("/", "", "/foo") == "/foo");
-  ASSERT("join", Path::join("", "/", "foo") == "/foo");
-  ASSERT("join", Path::join("", "/", "/foo") == "/foo");
+    auto o = Path::createObject();
+    o.dir = "/home/user/dir";
+    o.base = "file.txt";
+    o.ext = ".txt";
+    o.name = "file";
 
-  //
-  // PathObject
-  //
-  std::string pstr = "/home/user/dir/file.txt";
+    t->equal(Path::format(o), stra, "reformatted matches string");
 
-  auto o = Path::createObject();
-  o.dir = "/home/user/dir";
-  o.base = "file.txt";
-  o.ext = ".txt";
-  o.name = "file";
+    std::string strb = "/home/user/dir/file.txt";
+    auto p = Path::parse(strb);
 
-  ASSERT("format", Path::format(o) == pstr);
+    t->equal(p.dir, "/home/user/dir", "found dir");
+    t->equal(p.base, "file.txt", "found base");
+    t->equal(p.ext, ".txt", "found ext");
+    t->equal(p.name, "file", "found file");
+    t->equal(p.root, "/", "found root");
 
-  auto p = Path::parse(pstr);
-
-  ASSERT("parse", p.dir == "/home/user/dir");
-  ASSERT("parse", p.base == "file.txt");
-  ASSERT("parse", p.ext == ".txt");
-  ASSERT("parse", p.name == "file");
-  ASSERT("parse", p.root == "/"); */
+    t->end();
+  });
 }

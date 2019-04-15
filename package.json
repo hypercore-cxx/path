@@ -6,7 +6,7 @@
     "url": "git@github.com:datcxx/cxx-path"
   },
   "dependencies": {
-    "git@github.com:datcxx/cxx-util": "0568a579",
+    "git@github.com:datcxx/cxx-util": "a4eab23c",
     "git@github.com:heapwolf/cxx-tap": "8a380d78"
   },
   "license": "MIT",

@@ -2,6 +2,7 @@
 #include "deps/datcxx/cxx-util/index.hxx"
 
 #include <vector>
+#include <regex>
 
 namespace Path {
   using String = std::string;
@@ -46,59 +47,61 @@ namespace Path {
   }
 
   String extname(const String& path) {
-    std::vector<String> parts = Util::String::split(path, String(1, Path::sep()));
-    auto last = parts.back();
-    return last;
+    String ext;
+
+    auto tmp = Util::String::trim(path, "/");
+
+    if (tmp == "..") {
+      return "";
+    }
+    
+    if (tmp == ".") {
+      return "";
+    }
+    
+    if (tmp == "/") {
+      return "";
+    }
+    
+    if (tmp == "//") {
+      return "";
+    }
+
+    size_t dotIdx = tmp.find_last_of(".");
+
+    if (dotIdx != String::npos) {
+      size_t dirSepIdx = tmp.find_last_of("/\\");
+
+      if (dotIdx > dirSepIdx + 1) {
+        ext = tmp.substr(dotIdx);
+      }
+    }
+
+
+    return ext;
   }
 
-  /*
+  std::vector<String> splitPathList(const String& path) {
+    std::vector<String> result;
+    String::size_type start = 0;
+    String::size_type end = 0;
+    String delimiter = String(1, Path::sep());
 
-  vector<string> splitPathList(string path) {
-    vector<string> result;
-    string::size_type start = 0;
-    string::size_type end = 0;
-    string delimiter = Path::sep();
-
-    while (end != string::npos) {
+    while (end != String::npos) {
       end = path.find(delimiter, start);
 
       if (start < path.size() && start != end) {
-        string segment = path.substr(start, end - start);
+        String segment = path.substr(start, end - start);
         result.push_back(segment);
       }
       start = end + delimiter.size();
     }
+
     return result;
   }
 
-  vector<string> normalizePathList(vector<string> parts, bool allowAboveRoot) {
-    vector<string> res;
-    int len = parts.size();
-
-    for (int i = 0; i < len; i++) {
-      string p = parts[i];
-
-      if (p.empty() || p == ".") {
-        continue;
-      }
-
-      if (p == "..") {
-        if (res.empty() && res[res.size() - 1] != "..") {
-          res.pop_back();
-        }
-        else if (allowAboveRoot) {
-          res.emplace_back("..");
-        }
-      }
-      else {
-        res.push_back(p);
-      }
-    }
-    return res; 
-  }
-
-  string joinPathList(vector<string> list) {
-    string res;
+  String joinPathList(const std::vector<String>& list) {
+    String res;
     int len = list.size();
     int index = 0;
 
@@ -108,37 +111,59 @@ namespace Path {
         res += Path::sep();
       }
     }
+
     return res;
   }
 
-  string normalize(string path) {
+  std::vector<String> normalizePathList(std::vector<String> parts, bool allowAboveRoot) {
+    std::vector<String> res;
+    int len = parts.size();
 
+    for (int i = 0; i < len; i++) {
+      String p = parts[i];
+
+      if ((p.length() == 0) || p == ".") {
+        continue;
+      }
+
+      if (p == "..") {
+        if (!res.empty() && res[res.size() - 1] != "..") {
+          res.pop_back();
+        } else if (allowAboveRoot) {
+          res.emplace_back("..");
+        }
+      } else {
+        res.push_back(p);
+      }
+    }
+    return res; 
+  }
+
+  String normalize(const String& path) {
     bool isAbs = Path::isAbsolute(path);
-    bool trailingSlash = path[path.length() -1] == Path::sep()[0];
+    bool trailingSlash = path[path.length() -1] == Path::sep();
 
-    path = Path::joinPathList(normalizePathList(splitPathList(path), !isAbs));
+    auto split = Path::splitPathList(path);
+    auto normalized = Path::normalizePathList(split, !isAbs);
+    auto tmp = Path::joinPathList(normalized);
 
-    if (path.length() == 0 && !isAbs) {
-      path = ".";
+    if (tmp.length() == 0 && !isAbs) {
+      tmp = ".";
     }
 
     if (path.length() > 0 && trailingSlash) {
-      path += Path::sep();
+      tmp += Path::sep();
     }
 
-    return (isAbs ? Path::sep() : "") + path;
+    return (isAbs ? String(1, Path::sep()) : "") + tmp;
   }
 
-  std::vector<std::string> split(string path) {
-    regex RE("^(\\/?|)([\\s\\S]*?)((?:\\.{1,2}|[^\\/]+?|)(\\.[^.\\/]*|))(?:[\\/]*)$");
-    cmatch res;
-    regex_search(path, &res, RE);
-    return res;
-  }
+  String joinVector(const std::vector<String>& args) {
+    if (args.size() == 1 && args[0] == "/") {
+      return "/";
+    }
 
-  string _join(vector<string> args) {
-
-    string path;
+    String path;
 
     for (const auto &el : args) {
       if (el.length() > 0) {
@@ -153,31 +178,32 @@ namespace Path {
     return Path::normalize(path);
   }
 
-  string _resolve(vector<string> args) {
-
-    string resolvedPath = "";
+  String resolveFromVector(const std::vector<String>& args) {
+    String resolvedPath = "";
     bool resolvedAbsolute = false;
 
     for (int i = args.size() - 1; i >= -1 && !resolvedAbsolute; i--) {
-      string path = args[i];
+      String path = args[i];
 
       if (path.empty()) {
         continue;
       }
 
       resolvedPath = path + Path::sep() + resolvedPath;
-      resolvedAbsolute = path[0] == Path::sep()[0];
+      resolvedAbsolute = path[0] == Path::sep();
     }
 
     // At this point the path should be resolved to a full absolute path, but
     // handle relative paths to be safe (might happen when process.cwd() fails)
 
     // Normalize the path
-    resolvedPath = Path::joinPathList(
-      Path::normalizePathList(splitPathList(resolvedPath), !resolvedAbsolute)
-    );
+    auto split = Path::splitPathList(resolvedPath);
+    auto normalized = Path::normalizePathList(split, !resolvedAbsolute);
 
-    string p = ((resolvedAbsolute ? Path::sep() : "") + resolvedPath);
+    resolvedPath = Path::joinPathList(normalized);
+
+    auto sep = String(1, Path::sep());
+    String p = ((resolvedAbsolute ? sep : "") + resolvedPath);
 
     if (p.empty()) {
       return ".";
@@ -186,73 +212,126 @@ namespace Path {
     return p;
   }
 
-  string dirname(string path) {
-    cmatch result = Path::split(path);
-    string root;
-    string dir;
+  bool isPathSeparator (const char s) {
+    return s == '/' || s == '\\';
+  }
 
-    if (result[1].length() > 0) {
-      root = result[1];
-    }
+  String dirname(const String& path) {
+    size_t len = path.length();
 
-    if (result[2].length() > 0) {
-      dir = result[2];
-    }
-
-    if (!root.length() && !dir.length()) {
+    if (len == 0) {
       return ".";
     }
 
-    if (dir.length() > 0) {
-      dir = dir.substr(0, dir.length() - 1);
+    size_t rootEnd = -1;
+    size_t offset = 0;
+    const char ch = path[0];
+
+    if (len == 1) {
+      // `path` contains just a path separator, exit early to avoid
+      // unnecessary work or a dot.
+      return isPathSeparator(ch) ? path : ".";
     }
-    return root + dir;
+
+    // Try to match a root
+    if (isPathSeparator(ch)) {
+      // Possible UNC root
+
+      rootEnd = offset = 1;
+
+      if (isPathSeparator(path[1])) {
+        // Matched double path separator at beginning
+        size_t j = 2;
+        size_t last = j;
+
+        // Match 1 or more non-path separators
+        while (j < len && !isPathSeparator(path[j])) {
+          j++;
+        }
+
+        if (j < len && j != last) {
+          // Matched!
+          last = j;
+          // Match 1 or more path separators
+          while (j < len && isPathSeparator(path[j])) {
+            j++;
+          }
+
+          if (j < len && j != last) {
+            // Matched!
+            last = j;
+            // Match 1 or more non-path separators
+            while (j < len && !isPathSeparator(path[j])) {
+              j++;
+            }
+            if (j == len) {
+              // We matched a UNC root only
+              return path;
+            }
+            if (j != last) {
+              // We matched a UNC root with leftovers
+
+              // Offset by 1 to include the separator after the UNC root to
+              // treat it as a "normal root" on top of a (UNC) root
+              rootEnd = offset = j + 1;
+            }
+          }
+        }
+      }
+    // Possible device root
+    } else if (Util::String::test(String(1, ch), "[a-zA-Z]") && path[1] == ':') {
+      rootEnd = len > 2 && isPathSeparator(path[2]) ? 3 : 2;
+      offset = rootEnd;
+    }
+
+    size_t end = -1;
+    size_t matchedSlash = true;
+
+    for (size_t i = len - 1; i >= offset; --i) {
+      if (isPathSeparator(path[i])) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+        // We saw the first non-path separator
+        matchedSlash = false;
+      }
+    }
+
+    if (end == -1) {
+      if (rootEnd == -1) {
+        return ".";
+      }
+
+      end = rootEnd;
+    }
+
+    return path.substr(0, end);
   }
 
-  PathObject createObject() {
+  PathObject createObject () {
     Path::PathObject object;
     return object;
   }
 
-  PathObject parse(const string path) {
+  PathObject parse(const String& path) {
     PathObject o;
 
-    auto allParts = Path::split(path);
-
-    if (allParts.empty() || allParts.size() != 5) {
-      throw runtime_error("Invalid path '" + path + "'");
+    if (path.empty()) {
+      throw std::runtime_error("Invalid path '" + path + "'");
     }
 
-    o.root = allParts[1];
-    o.dir = string(allParts[1]) + string(allParts[2]).substr(0, allParts[2].length() - 1);
-    o.base = allParts[3];
-    o.ext = allParts[4];
-    o.name = string(allParts[3]).substr(0, allParts[3].length() - allParts[4].length());
+    o.root = path[0] == sep() ? String(1, sep()) : "";
+    o.dir = Path::dirname(path);
+    o.base = Path::basename(path);
+    o.ext = Path::extname(path);
+    o.name = o.base.substr(0, o.base.length() - o.ext.length());
     return o;
   }
 
-  string format(PathObject o) {
-    string dir = o.dir.length() > 0 ? o.dir + Path::sep() : "";
+  String format(PathObject& o) {
+    String dir = o.dir.length() > 0 ? o.dir + Path::sep() : "";
     return dir + o.base;
   }
-
-  string basename(string path, string ext) {
-    string f = Path::split(path)[3];
-
-    if (ext.length() > 0 && f.substr(f.length() - ext.length(), f.length()) == ext) {
-      f = f.substr(0, f.length() - ext.length());
-    }
-    return f;
-  }
-
-  string basename(string path) {
-    string ext;
-    return Path::basename(path, ext);
-  }
-
-  string extname(string path) {
-    return Path::split(path)[4];
-  }
-
-  */
 } // namespace Path

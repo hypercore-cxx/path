@@ -1,23 +1,26 @@
 # SYNOPSIS
 Utilities for handling and transforming filesystem paths.
 
+
 # USAGE
+This module is designed to work with the [`datcxx`][0] build tool. To add this
+module to your project us the following command...
 
-## AS A MODULE USING `BALE`.
-```cpp
-Path::extname("/path.to/.file.ext") == ".ext";
+```bash
+build add heapwolf/cxx-tap
 ```
 
-## AS A REGLUAR C++ LIBRARY.
-Build with `path.cc` as a dependency and include the header file.
 
-```cpp
-Path::extname("/path.to/.file.ext") == ".ext";
+# TEST
+
+```bash
+build test
 ```
+
 
 # API
 
-#### `string` path.join(string path1, string path2[, ...]);
+#### `string` Path::join(string path1, string path2[, ...]);
 Join all arguments together and normalize the resulting path. Arguments
 must be strings.
 
@@ -26,7 +29,7 @@ Path::join("/foo", "bar", "baz/asdf", "quux", "..");
 // returns "/foo/bar/baz/asdf"
 ```
 
-#### `bool` path.isAbsolute(string path);
+#### `bool` Path::isAbsolute(string path);
 Determines whether path is an absolute path. An absolute path will always
 resolve to the same location, regardless of the working directory.
 
@@ -37,7 +40,7 @@ Path::isAbsolute("qux/"); // false
 Path::isAbsolute("."); // false
 ```
 
-#### `string` path.dirname(string path);
+#### `string` Path::dirname(string path);
 Return the directory name of a path. Similar to the Unix dirname command.
 
 ```cpp
@@ -45,7 +48,7 @@ Path::dirname("/foo/bar/baz/asdf/quux");
 // returns "/foo/bar/baz/asdf"
 ```
 
-#### `string` path.basename(string path[, string ext]);
+#### `string` Path::basename(string path[, string ext]);
 Return the last portion of a path. Similar to the Unix basename command.
 
 ```cpp
@@ -76,7 +79,7 @@ Path::extname("index");
 // returns ""
 ```
 
-#### `string` path.parse(string path);
+#### `string` Path::parse(string path);
 Returns an object from a path string.
 
 ```cpp
@@ -92,7 +95,7 @@ o.ext = ".txt";
 o.name = "file";
 ```
 
-#### `PathObject` path.format(struct pathObject);
+#### `PathObject` Path::format(struct pathObject);
 Returns a path string from an object, the opposite of path.parse above.
 The struct can be created with the `path.createObject()` method.
 
@@ -109,7 +112,7 @@ Path::format(o);
 // returns "/home/user/dir/file.txt"
 ```
 
-#### `string` path.resolve(string path);
+#### `string` Path::resolve(string path);
 Resolves to to an absolute path. If to isn"t already absolute from 
 arguments are prepended in right to left order, until an absolute path 
 is found. The resulting path is normalized, and trailing slashes are 
@@ -126,10 +129,4 @@ Path::resolve("/foo/bar", "/tmp/file/");
 // returns "/tmp/file"
 ```
 
-## STATIC MEMBERS
-
-#### `string` path.sep
-The platform-specific file separator. "\\" or "/".
-
-#### `string` path.delimiter
-The platform-specific path delimiter, ";" or ":"
+[0]:https://github.com/datcxx/build
