@@ -1,3 +1,4 @@
 *.sw*
-deps/
-test/index
+/deps
+/test/index
+/test/index.dSYM
