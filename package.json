@@ -6,8 +6,7 @@
     "url": "git@github.com:datcxx/path"
   },
   "dependencies": {
-    "git@github.com:datcxx/util-string": "2d389f53",
-    "git@github.com:heapwolf/cxx-tap": "8a380d78"
+    "git@github.com:datcxx/util-string": "2d389f53"
   },
   "license": "MIT",
   "scripts": {
@@ -25,5 +24,8 @@
   "files": [
     "index.hxx",
     "index.cxx"
-  ]
+  ],
+  "devDependencies": {
+    "git@github.com:heapwolf/cxx-tap": "07821de0"
+  }
 }
