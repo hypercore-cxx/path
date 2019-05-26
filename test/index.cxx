@@ -1,10 +1,13 @@
-#include "../index.hxx"
-#include "../deps/heapwolf/cxx-tap/index.hxx"
 #include <istream>
 #include <regex>
 
+#include "../deps/heapwolf/cxx-tap/index.hxx"
+
+#include "../index.hxx"
+
 int main() {
   using namespace TAP;
+  namespace Path = Hyper::Util::Path;
   
   Test t;
 
