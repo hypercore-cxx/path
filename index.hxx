@@ -35,7 +35,7 @@ namespace Hyper {
       String basename(const String&);
       String dirname(const String&);
       String extname(const String&);
-
+      String relative(const String&, const String&);
       String format(PathObject&);
       PathObject parse(const String&);
       PathObject createObject();

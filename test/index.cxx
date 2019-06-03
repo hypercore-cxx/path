@@ -154,6 +154,22 @@ int main() {
     t->end();
   });
 
+  t.test("relative", [&] (auto t) {
+    t->equal(Path::relative("/var/lib", "/var"), "..");
+    t->equal(Path::relative("/var/lib", "/bin"), "../../bin");
+    t->equal(Path::relative("/var/lib", "/var/lib"), "");
+    t->equal(Path::relative("/var/lib", "/var/apache"), "../apache");
+    t->equal(Path::relative("/var/", "/var/lib"), "lib");
+    t->equal(Path::relative("/", "/var/lib"), "var/lib");
+    t->equal(Path::relative("/foo/test", "/foo/test/bar/package.json"), "bar/package.json");
+    t->equal(Path::relative("/Users/a/web/b/test/mails", "/Users/a/web/b"), "../..");
+    t->equal(Path::relative("/foo/bar/baz-quux", "/foo/bar/baz"), "../baz");
+    t->equal(Path::relative("/foo/bar/baz", "/foo/bar/baz-quux"), "../baz-quux");
+    t->equal(Path::relative("/baz-quux", "/baz"), "../baz");
+    t->equal(Path::relative("/baz", "/baz-quux"), "../baz-quux");
+    t->end();
+  });
+
   t.test("parse and format", [&] (auto t) {
 
     std::string stra = "/home/user/dir/file.txt";
