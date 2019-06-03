@@ -84,6 +84,47 @@ namespace Hyper {
         return ext;
       }
 
+      String relative(const String& from, const String& to) {
+        if (from == to) return "";
+        const auto f = Path::resolve(from);
+        const auto t = Path::resolve(to);
+        if (f == t) return "";
+        const auto fSlashOffset = f.find_first_not_of("/", 1);
+        const auto tSlashOffset = t.find_first_not_of("/", 1);
+        const auto fStart = fSlashOffset == -1 ? 1 : fSlashOffset;
+        const auto tStart = tSlashOffset == -1 ? 1 : tSlashOffset;
+        const auto fEnd = f.length();
+        const auto tEnd = t.length();
+        const auto fLen = fEnd - fStart;
+        const auto tLen = tEnd - tStart;
+        const auto len = fLen < tLen ? fLen : tLen;
+        auto lcs = -1; // last common separator
+        for (auto i = 0; i <= len; ++i) {
+          if (i == len) {
+            if (tLen > len) {
+              if (i == 0) return t.substr(tStart + i);
+              if (t[tStart + i] == '/') return t.substr(tStart + i + 1);
+            } else if (fLen > len && (i == 0 || f[fStart + i] == '/')) {
+              lcs = i;
+            }
+            break;
+          }
+          const auto fPos = fStart + i;
+          if (t[tStart + i] != f[fPos]) break;
+          if (f[fPos] == '/') lcs = i;
+        }
+
+        String result;
+        for (auto i = fStart + lcs + 1; i <= fEnd; ++i) {
+          if (i == fEnd || f[i] == '/') {
+            result += result.length() == 0 ? ".." : "/..";
+          }
+        }
+        
+        if (result.length() > 0) return result + t.substr(tStart + lcs);
+        return t.substr(t[lcs] == '/' ? tStart + lcs + 1 : tStart + lcs);
+      }
+
       std::vector<String> splitPathList(const String& path) {
         std::vector<String> result;
         String::size_type start = 0;
