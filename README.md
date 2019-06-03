@@ -79,6 +79,32 @@ Path::extname("index");
 // returns ""
 ```
 
+#### `string` path.relative(string from, string to);
+
+Return the relative path between `from` and `to` according to the current working directory. If `from` and `to` resolve to the
+same path (using [`path.resolve`](https://github.com/datcxx/path#string-pathresolvestring-path)) an empty string is returned.
+
+If either of the provided `from` or `to` parameters, the current
+working directory will be used in their place. 
+
+Examples:
+
+```cpp
+Path::relative("/var/lib", "/var");
+// returns ".."
+
+Path::relative("/var/lib", "/bin");
+// return "../../bin"
+
+Path::relative("/foo/test", "/foo/test/bar/package.json");
+
+// returns "bar/package.json"
+
+Path::relative("/Users/a/web/b/test/mails", "/Users/a/web/b");
+
+// returns "../.."
+```
+
 #### `string` Path::parse(string path);
 Returns an object from a path string.
 
